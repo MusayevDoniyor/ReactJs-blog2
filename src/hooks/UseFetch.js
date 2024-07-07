@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import api from "../api/posts";
+
 const useFetch = (path) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +31,7 @@ const useFetch = (path) => {
     };
   }, [path]);
 
-  return { data, loading, error };
+  return { data, loading, error, setData };
 };
 
 export default useFetch;

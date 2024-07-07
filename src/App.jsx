@@ -1,3 +1,9 @@
+import { Routes, Route, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { format } from "date-fns";
+import api from "./api/posts";
+import useFetch from "./hooks/UseFetch";
+import Swal from "sweetalert2";
 import Header from "./components/Header";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
@@ -6,12 +12,6 @@ import NewPost from "./components/NewPost";
 import PostPage from "./components/PostPage";
 import About from "./components/About";
 import Missing from "./components/Missing";
-import { Routes, useNavigate, Route } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { format } from "date-fns";
-import api from "./api/posts";
-import useFetch from "./hooks/UseFetch";
-import Swal from "sweetalert2";
 
 function App() {
   const [search, setSearch] = useState("");
@@ -22,16 +22,17 @@ function App() {
   const [deleting, setDeleting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const { data: posts, error, loading } = useFetch("/posts");
+  const { data: posts, loading, error, setData: setPosts } = useFetch("/posts");
 
   useEffect(() => {
-    const filteredResults = posts.filter(
-      (post) =>
-        post.body.toLowerCase().includes(search.toLowerCase()) ||
-        post.title.toLowerCase().includes(search.toLowerCase())
-    );
-
-    setSearchResults(filteredResults.reverse());
+    if (posts) {
+      const filteredResults = posts.filter(
+        (post) =>
+          post.body.toLowerCase().includes(search.toLowerCase()) ||
+          post.title.toLowerCase().includes(search.toLowerCase())
+      );
+      setSearchResults(filteredResults.reverse());
+    }
   }, [posts, search]);
 
   const handleSubmit = async (e) => {
@@ -44,6 +45,7 @@ function App() {
     try {
       await api.post("/posts", newPost);
       const updatedPosts = [...posts, newPost];
+      setPosts(updatedPosts); // Update posts state directly
       setSearchResults(updatedPosts);
       setPostTitle("");
       setPostBody("");
@@ -69,19 +71,19 @@ function App() {
 
       if (result.isConfirmed) {
         setDeleting(true);
-        api.delete(`/posts/${id}`);
+        await api.delete(`/posts/${id}`); // Ensure this request is awaited
         const postsList = posts.filter((post) => post.id !== id);
+        setPosts(postsList); // Update posts state directly
         setSearchResults(postsList);
         navigate("/");
         Swal.fire({
           title: "Deleted!",
-          text: "Your file has been deleted.",
+          text: "Your post has been deleted.",
           icon: "success",
         });
       }
     } catch (error) {
       console.error("Failed to delete post:", error);
-
       Swal.fire({
         title: "Error",
         text: "Failed to delete the post. Please try again later.",

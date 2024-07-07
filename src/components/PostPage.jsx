@@ -13,12 +13,19 @@ const PostPage = ({ posts, handleDelete, deleting }) => {
             <h2>{post.title}</h2>
             <p className="postDate">{post.datetime}</p>
             <p className="postBody">{post.body}</p>
-            <button disabled={deleting} onClick={() => handleDelete(post.id)}>
+            <button
+              disabled={deleting}
+              onClick={() => handleDelete(post.id)}
+              style={{
+                backgroundColor: deleting ? "#ccc" : "#f00",
+                cursor: deleting ? "not-allowed" : "pointer",
+              }}
+            >
               {deleting ? "In progress..." : "Delete Post"}
             </button>
             <button
               style={{ marginLeft: "10px", backgroundColor: "#777" }}
-              onClick={() => navigate("/")}
+              onClick={() => navigate(-1)}
             >
               Cancel
             </button>
